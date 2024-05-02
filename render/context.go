@@ -56,6 +56,10 @@ type Context interface {
 	WrapError(err error) Error
 }
 
+type ITemplateStore interface {
+	ReadTemplate(templatename string) ([]byte, error)
+}
+
 type rendererContext struct {
 	ctx  nodeContext
 	node *TagNode
