@@ -151,7 +151,7 @@ func (c rendererContext) RenderChildren(w io.Writer) Error {
 }
 
 func (c rendererContext) RenderFile(filename string, b map[string]interface{}) (string, error) {
-	source, err := ioutil.ReadFile(filename)
+	source, err := c.ctx.config.TemplateStore.ReadTemplate(filename)
 	if err != nil && os.IsNotExist(err) {
 		// Is it cached?
 		if cval, ok := c.ctx.config.Cache[filename]; ok {
