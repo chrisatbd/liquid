@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/osteele/liquid/parser"
+	"github.com/chrisatbd/liquid/parser"
 	"github.com/stretchr/testify/require"
 )
 

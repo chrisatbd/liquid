@@ -3,13 +3,13 @@ package render
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
+
 	"os"
 	"strings"
 
-	"github.com/osteele/liquid/parser"
+	"github.com/chrisatbd/liquid/parser"
 
-	"github.com/osteele/liquid/expressions"
+	"github.com/chrisatbd/liquid/expressions"
 )
 
 // Context provides the rendering context for a tag renderer.

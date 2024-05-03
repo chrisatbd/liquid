@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/osteele/liquid/render"
+	"github.com/chrisatbd/liquid/render"
 	"github.com/stretchr/testify/require"
 )
 
