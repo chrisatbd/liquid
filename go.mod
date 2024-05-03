@@ -1,7 +1,4 @@
-//DONOTMERGE
-//DONOTMERGE
-//DONOTMERGE
-module github.com/chrisatbd/liquid
+module github.com/osteele/liquid
 
 go 1.17
 
