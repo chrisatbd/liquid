@@ -2,3 +2,7 @@
 *.out
 /liquid
 *.test
+
+*.user.md
+
+.vscode/*
