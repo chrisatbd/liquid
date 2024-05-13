@@ -65,8 +65,8 @@ func (e *Engine) RegisterTag(name string, td Renderer) {
 	})
 }
 
-func (e *Engine) RegisterTemplateStore(templateStore interface{}) {
-	e.cfg.TemplateStore = templateStore.(render.ITemplateStore)
+func (e *Engine) RegisterTemplateStore(templateStore render.ITemplateStore) {
+	e.cfg.TemplateStore = templateStore
 }
 
 // StrictVariables causes the renderer to error when the template contains an undefined variable.
