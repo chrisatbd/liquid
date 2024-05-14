@@ -24,6 +24,7 @@ var iterationTests = []struct{ in, expected string }{
 	{`{% for a in map %}{{ a[0] }}={{ a[1] }}.{% endfor %}`, "a=1."},
 	{`{% for a in map_slice %}{{ a[0] }}={{ a[1] }}.{% endfor %}`, "a=1.b=2."},
 	{`{% for k in keyed_map %}{{ k }}={{ keyed_map[k] }}.{% endfor %}`, "a=1.b=2."},
+	{`{% for a in empty_array %}.{% endfor %}`, ""},
 
 	// loop modifiers
 	{`{% for a in array reversed %}{{ a }}.{% endfor %}`, "third.second.first."},
@@ -137,10 +138,11 @@ var iterationTestBindings = map[string]interface{}{
 	"products": []string{
 		"Cool Shirt", "Alien Poster", "Batman Poster", "Bullseye Shirt", "Another Classic Vinyl", "Awesome Jeans",
 	},
-	"offset":   1,
-	"limit":    2,
-	"cols":     2,
-	"loopmods": map[string]interface{}{"limit": 2, "offset": 1, "cols": 2},
+	"offset":      1,
+	"limit":       2,
+	"cols":        2,
+	"loopmods":    map[string]interface{}{"limit": 2, "offset": 1, "cols": 2},
+	"empty_array": []string{},
 }
 
 func TestIterationTags(t *testing.T) {
