@@ -3,6 +3,9 @@
 /liquid
 *.test
 
-*.user.md
-
 .vscode/*
+.user/*
+
+
+*.user.md
+*.user.sh
