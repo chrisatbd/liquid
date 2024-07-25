@@ -12,6 +12,7 @@ import (
 func AddStandardTags(c render.Config) {
 	c.AddTag("assign", assignTag)
 	c.AddTag("include", includeTag)
+	c.AddTag("render", renderTag)
 
 	// blocks
 	// The parser only recognize the comment and raw tags if they've been defined,

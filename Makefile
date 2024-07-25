@@ -12,7 +12,9 @@ clean: ## remove binary files
 	rm -f ${LIB} ${CMD}
 
 coverage: ## test the package, with coverage
-	go test -cov ./...
+	go clean -testcache
+	go test ./... -coverprofile .user/cover.out
+	go tool cover -html=.user/cover.out -o .user/cover.html
 
 deps: ## list dependencies
 	@go list -f '{{join .Deps "\n"}}' ./... | grep -v `go list -f '{{.ImportPath}}'` | grep '\.' | sort | uniq
@@ -38,6 +40,7 @@ setup: ## install dependencies and development tools
 	go get -t ./...
 
 test: ## test the package
+	go clean -testcache
 	go test ./...
 
 # Source: https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
