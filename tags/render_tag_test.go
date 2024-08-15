@@ -61,6 +61,7 @@ func TestRenderTag_file_not_found_error(t *testing.T) {
 }
 
 func TestRenderTag_cached_value_handling(t *testing.T) {
+	t.Skip("Skipped for Now.  Refer to TestIncludeTag_cached_value_handling")
 	config := render.NewConfig()
 	// missing-file.html does not exist in the testdata directory.
 	config.Cache["testdata/missing-file.html"] = []byte("include-content")
