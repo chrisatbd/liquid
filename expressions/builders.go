@@ -43,3 +43,12 @@ func makeObjectPropertyExpr(objFn func(Context) values.Value, name string) func(
 		return objFn(ctx).PropertyValue(index)
 	}
 }
+
+func makeObjectFunctionExpr(objFn func(Context) values.Value, name string, thenthis interface{}) func(Context) values.Value {
+	index := values.ValueOf(name)
+	tt := values.ValueOf(thenthis)
+	_ = tt
+	return func(ctx Context) values.Value {
+		return objFn(ctx).PropertyValue(index)
+	}
+}

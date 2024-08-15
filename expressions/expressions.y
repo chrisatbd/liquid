@@ -35,9 +35,10 @@ func init() {
 %type<loopmods> loop_modifiers
 %type<s> string
 %token <val> LITERAL
-%token <name> IDENTIFIER KEYWORD PROPERTY
+%token <name> IDENTIFIER KEYWORD PROPERTY FUNCTION
 %token ASSIGN CYCLE LOOP WHEN
 %token EQ NEQ GE LE IN AND OR CONTAINS DOTDOT
+%token CLOSEP OPENP
 %left '.' '|'
 %left '<' '>'
 %%
@@ -121,6 +122,7 @@ expr:
 | expr '[' expr ']' { $$ = makeIndexExpr($1, $3) }
 | '(' expr DOTDOT expr ')' { $$ = makeRangeExpr($2, $4) }
 | '(' cond ')' { $$ = $2 }
+| expr PROPERTY OPENP LITERAL CLOSEP { $$ = makeObjectFunctionExpr($1, $2, $4) }
 ;
 
 filtered:

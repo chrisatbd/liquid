@@ -70,10 +70,10 @@ func ExampleEngine_RegisterFilter_optional_argument() {
 	// Then we can't tell the difference between {{ n | inc }} and
 	// {{ n | inc: 0 }}. A function in the parameter list has a special
 	// meaning as a default parameter.
-	engine.RegisterFilter("inc", func(a int, b func(int) int) int {
+	engine.RegisterFilter("increment", func(a int, b func(int) int) int {
 		return a + b(1)
 	})
-	template := `10 + 1 = {{ m | inc }}; 20 + 5 = {{ n | inc: 5 }}`
+	template := `{{ m }} + 1 = {{ m | increment }}; {{ n }} + 5 = {{ n | increment: 5 }}`
 	bindings := map[string]interface{}{
 		"m": 10,
 		"n": "20",
