@@ -118,8 +118,8 @@ func (lex *lexer) Lex(out *yySymType) int {
 			identifier ':' => { tok = KEYWORD; out.name = string(lex.data[lex.ts:lex.te-1]); fbreak; };
 			identifier => Identifier;
 			property => { tok = PROPERTY; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
-			openp => { tok = OPENP ; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
-			closep => { tok = CLOSEP ; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
+			openp => { tok = OPENP; fbreak; };
+			closep => { tok = CLOSEP; fbreak; };
 			space+;
 			any => { tok = int(lex.data[lex.ts]); fbreak; };
 		*|;

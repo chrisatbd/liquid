@@ -17,7 +17,7 @@ func init() {
 	_ = ""
 }
 
-//line expressions.y:15
+//line expressions.y:16
 type yySymType struct {
 	yys           int
 	name          string
@@ -542,50 +542,50 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line expressions.y:46
+//line expressions.y:49
 		{
 			yylex.(*lexer).val = yyDollar[1].f
 		}
 	case 2:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line expressions.y:47
+//line expressions.y:50
 		{
 			yylex.(*lexer).Assignment = Assignment{yyDollar[2].name, &expression{yyDollar[4].f}}
 		}
 	case 3:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:50
+//line expressions.y:51
 		{
 			yylex.(*lexer).Cycle = yyDollar[2].cycle
 		}
 	case 4:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:51
+//line expressions.y:52
 		{
 			yylex.(*lexer).Loop = yyDollar[2].loop
 		}
 	case 5:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:52
+//line expressions.y:53
 		{
 			yylex.(*lexer).When = When{yyDollar[2].exprs}
 		}
 	case 6:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line expressions.y:55
+//line expressions.y:56
 		{
 			yyVAL.cycle = yyDollar[2].cyclefn(yyDollar[1].s)
 		}
 	case 7:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:58
+//line expressions.y:59
 		{
 			h, t := yyDollar[2].s, yyDollar[3].ss
 			yyVAL.cyclefn = func(g string) Cycle { return Cycle{g, append([]string{h}, t...)} }
 		}
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line expressions.y:62
+//line expressions.y:63
 		{
 			vals := yyDollar[1].ss
 			yyVAL.cyclefn = func(h string) Cycle { return Cycle{Values: append([]string{h}, vals...)} }
@@ -610,19 +610,19 @@ yydefault:
 		}
 	case 12:
 		yyDollar = yyS[yypt-0 : yypt+1]
-//line expressions.y:75
+//line expressions.y:76
 		{
 			yyVAL.exprs = []Expression{}
 		}
 	case 13:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:76
+//line expressions.y:77
 		{
 			yyVAL.exprs = append([]Expression{&expression{yyDollar[2].f}}, yyDollar[3].exprs...)
 		}
 	case 14:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line expressions.y:79
+//line expressions.y:80
 		{
 			s, ok := yyDollar[1].val.(string)
 			if !ok {
@@ -657,7 +657,7 @@ yydefault:
 		}
 	case 18:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:104
+//line expressions.y:103
 		{
 			switch yyDollar[2].name {
 			case "cols":
@@ -673,75 +673,75 @@ yydefault:
 		}
 	case 19:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line expressions.y:120
+//line expressions.y:117
 		{
 			val := yyDollar[1].val
 			yyVAL.f = func(Context) values.Value { return values.ValueOf(val) }
 		}
 	case 20:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line expressions.y:121
+//line expressions.y:118
 		{
 			name := yyDollar[1].name
 			yyVAL.f = func(ctx Context) values.Value { return values.ValueOf(ctx.Get(name)) }
 		}
 	case 21:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line expressions.y:122
+//line expressions.y:119
 		{
 			yyVAL.f = makeObjectPropertyExpr(yyDollar[1].f, yyDollar[2].name)
 		}
 	case 22:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line expressions.y:123
+//line expressions.y:120
 		{
 			yyVAL.f = makeIndexExpr(yyDollar[1].f, yyDollar[3].f)
 		}
 	case 23:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line expressions.y:124
+//line expressions.y:121
 		{
 			yyVAL.f = makeRangeExpr(yyDollar[2].f, yyDollar[4].f)
 		}
 	case 24:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:125
+//line expressions.y:122
 		{
 			yyVAL.f = yyDollar[2].f
 		}
 	case 25:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line expressions.y:126
+//line expressions.y:123
 		{
 			yyVAL.f = makeObjectMethodExpr(yyDollar[1].f, yyDollar[2].name, yyDollar[4].exprs)
 		}
 	case 27:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:131
+//line expressions.y:127
 		{
 			yyVAL.f = makeFilter(yyDollar[1].f, yyDollar[3].name, nil)
 		}
 	case 28:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line expressions.y:132
+//line expressions.y:128
 		{
 			yyVAL.f = makeFilter(yyDollar[1].f, yyDollar[3].name, yyDollar[4].filter_params)
 		}
 	case 29:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line expressions.y:136
+//line expressions.y:131
 		{
 			yyVAL.filter_params = []valueFn{yyDollar[1].f}
 		}
 	case 30:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:138
+//line expressions.y:132
 		{
 			yyVAL.filter_params = append(yyDollar[1].filter_params, yyDollar[3].f)
 		}
 	case 32:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:142
+//line expressions.y:136
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -751,7 +751,7 @@ yydefault:
 		}
 	case 33:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:149
+//line expressions.y:142
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -761,7 +761,7 @@ yydefault:
 		}
 	case 34:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:156
+//line expressions.y:148
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -771,7 +771,7 @@ yydefault:
 		}
 	case 35:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:163
+//line expressions.y:154
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -781,7 +781,7 @@ yydefault:
 		}
 	case 36:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:170
+//line expressions.y:160
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -791,7 +791,7 @@ yydefault:
 		}
 	case 37:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:177
+//line expressions.y:166
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -801,13 +801,13 @@ yydefault:
 		}
 	case 38:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:184
+//line expressions.y:172
 		{
 			yyVAL.f = makeContainsExpr(yyDollar[1].f, yyDollar[3].f)
 		}
 	case 40:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:189
+//line expressions.y:176
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {
@@ -816,7 +816,7 @@ yydefault:
 		}
 	case 41:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line expressions.y:195
+//line expressions.y:181
 		{
 			fa, fb := yyDollar[1].f, yyDollar[3].f
 			yyVAL.f = func(ctx Context) values.Value {

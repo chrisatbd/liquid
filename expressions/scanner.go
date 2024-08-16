@@ -468,7 +468,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 				lex.te = (lex.p) + 1
 				{
 					tok = OPENP
-					out.name = string(lex.data[lex.ts+1 : lex.te])
 					(lex.p)++
 					goto _out
 				}
@@ -477,7 +476,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 				lex.te = (lex.p) + 1
 				{
 					tok = CLOSEP
-					out.name = string(lex.data[lex.ts+1 : lex.te])
 					(lex.p)++
 					goto _out
 				}
