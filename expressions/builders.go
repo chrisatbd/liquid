@@ -1,6 +1,8 @@
 package expressions
 
 import (
+	"reflect"
+
 	"github.com/chrisatbd/liquid/values"
 )
 
@@ -49,6 +51,25 @@ func makeObjectMethodExpr(objFn func(Context) values.Value, name string, thenthi
 	tt := values.ValueOf(thenthis)
 	_ = tt
 	return func(ctx Context) values.Value {
-		return objFn(ctx).PropertyValue(index)
+		r := tt
+		_ = r
+		arr := r.Interface()
+		_ = arr
+
+		data := arr.([]Expression)
+
+		//_ = data
+
+		//inputs := make([]reflect.Value, len(args))
+
+		inputs := make([]reflect.Value, len(data))
+		inputs[0] = reflect.ValueOf("c")
+
+		for i, _ := range data {
+			eval, _ := data[i].Evaluate(ctx)
+			inputs[i] = reflect.ValueOf(eval)
+		}
+
+		return objFn(ctx).MethodValue(index, inputs)
 	}
 }

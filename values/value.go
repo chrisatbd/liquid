@@ -21,6 +21,7 @@ type Value interface {
 	Contains(Value) bool
 	IndexValue(Value) Value
 	PropertyValue(Value) Value
+	MethodValue(Value, []reflect.Value) Value
 
 	// Predicate
 	Test() bool
@@ -80,24 +81,26 @@ const (
 // embed this in a struct to "inherit" default implementations of the Value interface
 type valueEmbed struct{}
 
-func (v valueEmbed) Equal(Value) bool          { return false }
-func (v valueEmbed) Less(Value) bool           { return false }
-func (v valueEmbed) IndexValue(Value) Value    { return nilValue }
-func (v valueEmbed) Contains(Value) bool       { return false }
-func (v valueEmbed) Int() int                  { panic(conversionError("", v, reflect.TypeOf(1))) }
-func (v valueEmbed) PropertyValue(Value) Value { return nilValue }
-func (v valueEmbed) Test() bool                { return true }
+func (v valueEmbed) Equal(Value) bool                         { return false }
+func (v valueEmbed) Less(Value) bool                          { return false }
+func (v valueEmbed) IndexValue(Value) Value                   { return nilValue }
+func (v valueEmbed) Contains(Value) bool                      { return false }
+func (v valueEmbed) Int() int                                 { panic(conversionError("", v, reflect.TypeOf(1))) }
+func (v valueEmbed) PropertyValue(Value) Value                { return nilValue }
+func (v valueEmbed) MethodValue(Value, []reflect.Value) Value { return nilValue }
+func (v valueEmbed) Test() bool                               { return true }
 
 // A wrapperValue wraps a Go value.
 type wrapperValue struct{ value interface{} }
 
-func (v wrapperValue) Equal(other Value) bool    { return Equal(v.value, other.Interface()) }
-func (v wrapperValue) Less(other Value) bool     { return Less(v.value, other.Interface()) }
-func (v wrapperValue) IndexValue(Value) Value    { return nilValue }
-func (v wrapperValue) Contains(Value) bool       { return false }
-func (v wrapperValue) Interface() interface{}    { return v.value }
-func (v wrapperValue) PropertyValue(Value) Value { return nilValue }
-func (v wrapperValue) Test() bool                { return v.value != nil && v.value != false }
+func (v wrapperValue) Equal(other Value) bool                   { return Equal(v.value, other.Interface()) }
+func (v wrapperValue) Less(other Value) bool                    { return Less(v.value, other.Interface()) }
+func (v wrapperValue) IndexValue(Value) Value                   { return nilValue }
+func (v wrapperValue) Contains(Value) bool                      { return false }
+func (v wrapperValue) Interface() interface{}                   { return v.value }
+func (v wrapperValue) PropertyValue(Value) Value                { return nilValue }
+func (v wrapperValue) MethodValue(Value, []reflect.Value) Value { return nilValue }
+func (v wrapperValue) Test() bool                               { return v.value != nil && v.value != false }
 
 func (v wrapperValue) Int() int {
 	if n, ok := v.value.(int); ok {

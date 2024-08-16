@@ -77,11 +77,11 @@ func (lex *lexer) Lex(out *yySymType) int {
 
 		openp = '(';
 		closep = ')';
-		identifier = (alpha | '_') . (alnum | '_' | '-')*  '?'? ;
 
+		identifier = (alpha | '_') . (alnum | '_' | '-')*  '?'? ;
 		# TODO is this the form for a property? (in which case can share w/ identifier)
 		property = '.' (alpha | '_') . (alnum | '_' | '-')* '?' ? ;
-		#function = property . openp . (any)* . closep ;
+
 		int = '-'? digit+ ;
 		float = '-'? digit+ ('.' digit+)? ;
 		string = '"' (any - '"')* '"' | "'" (any - "'")* "'" ; # TODO escapes
@@ -118,7 +118,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 			identifier ':' => { tok = KEYWORD; out.name = string(lex.data[lex.ts:lex.te-1]); fbreak; };
 			identifier => Identifier;
 			property => { tok = PROPERTY; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
-			#function => { tok = FUNCTION; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
 			openp => { tok = OPENP ; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
 			closep => { tok = CLOSEP ; out.name = string(lex.data[lex.ts+1:lex.te]); fbreak; };
 			space+;

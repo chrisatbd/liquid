@@ -1,6 +1,7 @@
 package liquid
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -18,6 +19,10 @@ type testValueStructTwo struct {
 
 func (tv testValueStructTwo) FunctionOne() int                { return 3 }
 func (tv testValueStructTwo) FunctionTwo(query string) string { return query + "3" }
+func (tv testValueStructTwo) FunctionThree(query string, val int) string {
+	t := strconv.Itoa(val)
+	return query + " " + t
+}
 
 func TestValueStruct_One(t *testing.T) {
 	engine := NewEngine()
@@ -122,7 +127,7 @@ func TestValueStruct_Five(t *testing.T) {
 	har := testValueStructTwo{}
 	har.PropertyOne = 9
 
-	template := `{{ struct.FunctionTwo("chris",1) }}`
+	template := `{{ struct.FunctionTwo("chris") }}`
 	bindings := map[string]interface{}{
 		"struct": har,
 	}
@@ -136,3 +141,27 @@ func TestValueStruct_Five(t *testing.T) {
 	_ = engine
 	_ = har
 }
+
+func TestValueStruct_Six(t *testing.T) {
+
+	engine := NewEngine()
+
+	har := testValueStructTwo{}
+	har.PropertyOne = 9
+
+	template := `{{ struct.FunctionThree("chris",57) }}`
+	bindings := map[string]interface{}{
+		"struct": har,
+	}
+
+	out, err := engine.ParseAndRenderString(template, bindings)
+	if err != nil {
+		t.Log(err)
+	}
+	t.Log(out)
+
+	_ = engine
+	_ = har
+}
+
+

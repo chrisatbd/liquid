@@ -31,6 +31,27 @@ func (sv structValue) Contains(elem Value) bool {
 	return false
 }
 
+func (sv structValue) MethodValue(k Value, l []reflect.Value) Value {
+	name, ok := k.Interface().(string)
+	if !ok {
+		return nilValue
+	}
+
+	sr := reflect.ValueOf(sv.value)
+	st := reflect.TypeOf(sv.value)
+
+	if _, ok := st.MethodByName(name); ok {
+		m := sr.MethodByName(name)
+		return sv.invokeMethod(m, l)
+	}
+
+	_ = sr
+	_ = st
+	_ = name
+
+	return nilValue
+}
+
 func (sv structValue) PropertyValue(index Value) Value {
 	name, ok := index.Interface().(string)
 	if !ok {
@@ -97,5 +118,23 @@ func (sv structValue) invoke(fv reflect.Value) Value {
 	if len(results) > 1 && !results[1].IsNil() {
 		panic(results[1].Interface())
 	}
+	return ValueOf(results[0].Interface())
+}
+
+func (sv structValue) invokeMethod(fv reflect.Value, args []reflect.Value) Value {
+	if fv.IsNil() {
+		return nilValue
+	}
+	mt := fv.Type()
+	if mt.NumOut() > 2 {
+		return nilValue
+	}
+
+	results := fv.Call(args)
+
+	if len(results) > 1 && !results[1].IsNil() {
+		panic(results[1].Interface())
+	}
+
 	return ValueOf(results[0].Interface())
 }

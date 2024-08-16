@@ -1,6 +1,7 @@
 package values
 
 import (
+	"reflect"
 	"sync"
 )
 
@@ -36,4 +37,7 @@ func (w *dropWrapper) Contains(o Value) bool       { return w.Resolve().Contains
 func (w *dropWrapper) Int() int                    { return w.Resolve().Int() }
 func (w *dropWrapper) Interface() interface{}      { return w.Resolve().Interface() }
 func (w *dropWrapper) PropertyValue(k Value) Value { return w.Resolve().PropertyValue(k) }
-func (w *dropWrapper) Test() bool                  { return w.Resolve().Test() }
+func (w *dropWrapper) MethodValue(k Value, l []reflect.Value) Value {
+	return w.Resolve().MethodValue(k, l)
+}
+func (w *dropWrapper) Test() bool { return w.Resolve().Test() }

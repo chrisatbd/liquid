@@ -38,7 +38,7 @@ func init() {
 %token <name> IDENTIFIER KEYWORD PROPERTY
 %token ASSIGN CYCLE LOOP WHEN
 %token EQ NEQ GE LE IN AND OR CONTAINS DOTDOT
-%token CLOSEP OPENP
+%token OPENP CLOSEP
 %left '.' '|'
 %left '<' '>'
 %%
@@ -121,8 +121,8 @@ expr:
 | IDENTIFIER { name := $1; $$ = func(ctx Context) values.Value { return values.ValueOf(ctx.Get(name)) } }
 | expr PROPERTY { $$ = makeObjectPropertyExpr($1, $2) }
 | expr '[' expr ']' { $$ = makeIndexExpr($1, $3) }
-| '(' expr DOTDOT expr ')' { $$ = makeRangeExpr($2, $4) }
-| '(' cond ')' { $$ = $2 }
+| OPENP expr DOTDOT expr CLOSEP { $$ = makeRangeExpr($2, $4) }
+| OPENP cond CLOSEP { $$ = $2 }
 | expr PROPERTY OPENP exprs CLOSEP { $$ = makeObjectMethodExpr($1, $2, $4) }
 ;
 

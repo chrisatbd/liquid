@@ -464,7 +464,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 					goto _out
 				}
 			case 22:
-//line scanner.rl:122
+//line scanner.rl:121
 				lex.te = (lex.p) + 1
 				{
 					tok = OPENP
@@ -473,7 +473,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 					goto _out
 				}
 			case 23:
-//line scanner.rl:123
+//line scanner.rl:122
 				lex.te = (lex.p) + 1
 				{
 					tok = CLOSEP
@@ -482,7 +482,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 					goto _out
 				}
 			case 24:
-//line scanner.rl:125
+//line scanner.rl:124
 				lex.te = (lex.p) + 1
 				{
 					tok = int(lex.data[lex.ts])
@@ -541,12 +541,12 @@ func (lex *lexer) Lex(out *yySymType) int {
 					goto _out
 				}
 			case 29:
-//line scanner.rl:124
+//line scanner.rl:123
 				lex.te = (lex.p)
 				(lex.p)--
 
 			case 30:
-//line scanner.rl:125
+//line scanner.rl:124
 				lex.te = (lex.p)
 				(lex.p)--
 				{
@@ -569,7 +569,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 
 				}
 			case 32:
-//line scanner.rl:125
+//line scanner.rl:124
 				(lex.p) = (lex.te) - 1
 				{
 					tok = int(lex.data[lex.ts])
@@ -675,7 +675,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 		}
 	}
 
-//line scanner.rl:129
+//line scanner.rl:128
 
 	return tok
 }
