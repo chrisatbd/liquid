@@ -46,24 +46,15 @@ func makeObjectPropertyExpr(objFn func(Context) values.Value, name string) func(
 	}
 }
 
-func makeObjectMethodExpr(objFn func(Context) values.Value, name string, thenthis interface{}) func(Context) values.Value {
+func makeObjectMethodExpr(objFn func(Context) values.Value, name string, args interface{}) func(Context) values.Value {
 	index := values.ValueOf(name)
-	tt := values.ValueOf(thenthis)
-	_ = tt
-	return func(ctx Context) values.Value {
-		r := tt
-		_ = r
-		arr := r.Interface()
-		_ = arr
+	tt := values.ValueOf(args)
 
+	return func(ctx Context) values.Value {
+		arr := tt.Interface()
 		data := arr.([]Expression)
 
-		//_ = data
-
-		//inputs := make([]reflect.Value, len(args))
-
 		inputs := make([]reflect.Value, len(data))
-		inputs[0] = reflect.ValueOf("c")
 
 		for i, _ := range data {
 			eval, _ := data[i].Evaluate(ctx)

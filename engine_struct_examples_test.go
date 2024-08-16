@@ -3,6 +3,8 @@ package liquid
 import (
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type testValueStruct struct {
@@ -21,7 +23,12 @@ func (tv testValueStructTwo) FunctionOne() int                { return 3 }
 func (tv testValueStructTwo) FunctionTwo(query string) string { return query + "3" }
 func (tv testValueStructTwo) FunctionThree(query string, val int) string {
 	t := strconv.Itoa(val)
-	return query + " " + t
+	return query + ":" + t
+}
+
+type SimpleBindingStruct struct {
+	Name string
+	Id   int
 }
 
 func TestValueStruct_One(t *testing.T) {
@@ -35,14 +42,10 @@ func TestValueStruct_One(t *testing.T) {
 		"m": har,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-	}
-	t.Log(out)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "9.3", value)
 }
 
 func TestValueStruct_Two(t *testing.T) {
@@ -56,15 +59,10 @@ func TestValueStruct_Two(t *testing.T) {
 		"m": har,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
-	t.Log(out)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "9.3.c", value)
 }
 
 func TestValueStruct_Three(t *testing.T) {
@@ -81,14 +79,10 @@ func TestValueStruct_Three(t *testing.T) {
 		"struct": har,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-	}
-	t.Log(out)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "9.3 a text token two", value)
 }
 
 func TestValueStruct_Four(t *testing.T) {
@@ -105,19 +99,10 @@ func TestValueStruct_Four(t *testing.T) {
 		"struct": har,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-	}
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	t.Log(out)
-
-	if out != "two" {
-		t.Fail()
-	}
-
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "two", value)
 }
 
 func TestValueStruct_Five(t *testing.T) {
@@ -132,14 +117,10 @@ func TestValueStruct_Five(t *testing.T) {
 		"struct": har,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-	}
-	t.Log(out)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "chris3", value)
 }
 
 func TestValueStruct_Six(t *testing.T) {
@@ -149,19 +130,63 @@ func TestValueStruct_Six(t *testing.T) {
 	har := testValueStructTwo{}
 	har.PropertyOne = 9
 
-	template := `{{ struct.FunctionThree("chris",57) }}`
+	template := `{{ struct.FunctionThree("chris",57) }} | {{ myStringProp }} | {{ myIntProp }}`
+
 	bindings := map[string]interface{}{
-		"struct": har,
+		"struct":       har,
+		"myStringProp": "ag",
+		"myIntProp":    1,
 	}
 
-	out, err := engine.ParseAndRenderString(template, bindings)
-	if err != nil {
-		t.Log(err)
-	}
-	t.Log(out)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	_ = engine
-	_ = har
+	require.NoError(t, err)
+	require.Equal(t, "chris:57 | ag | 1", value)
 }
 
+func TestValueStruct_Seven(t *testing.T) {
 
+	engine := NewEngine()
+
+	har := testValueStructTwo{}
+	har.PropertyOne = 9
+
+	template := `{{ struct.FunctionThree("chris",57) }} | {{ myStringProp }} | {{ myIntProp }} | {{ struct.FunctionThree(myStringProp,myIntProp) }}`
+	// {assign var = "c"}
+	//template := `{{ struct.FunctionThree(myprop) }}`
+	bindings := map[string]interface{}{
+		"struct":       har,
+		"myStringProp": "ag",
+		"myIntProp":    1,
+	}
+
+	value, err := engine.ParseAndRenderString(template, bindings)
+
+	require.NoError(t, err)
+	require.Equal(t, "chris:57 | ag | 1 | ag:1", value)
+}
+
+func TestValueStruct_Eight(t *testing.T) {
+
+	engine := NewEngine()
+
+	har := testValueStructTwo{}
+	har.PropertyOne = 9
+
+	template := `{{ struct.FunctionThree("chris",57) }} | {{ struct.FunctionThree(myStringProp,myIntProp) }} | {{ struct.FunctionThree(sbs.Name,sbs.Id) }}`
+
+	sbs := SimpleBindingStruct{"joe jones", 72}
+
+	bindings := map[string]interface{}{
+		"struct":       har,
+		"myStringProp": "ag",
+		"myIntProp":    1,
+		"sbs":          sbs,
+	}
+
+	value, err := engine.ParseAndRenderString(template, bindings)
+
+	require.NoError(t, err)
+	require.Equal(t, "chris:57 | ag:1 | joe jones:72", value)
+
+}
