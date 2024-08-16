@@ -122,7 +122,7 @@ func TestValueStruct_Five(t *testing.T) {
 	har := testValueStructTwo{}
 	har.PropertyOne = 9
 
-	template := `{{ struct.FunctionTwo("chris") }}`
+	template := `{{ struct.FunctionTwo("chris",1) }}`
 	bindings := map[string]interface{}{
 		"struct": har,
 	}

@@ -44,7 +44,7 @@ func makeObjectPropertyExpr(objFn func(Context) values.Value, name string) func(
 	}
 }
 
-func makeObjectFunctionExpr(objFn func(Context) values.Value, name string, thenthis interface{}) func(Context) values.Value {
+func makeObjectMethodExpr(objFn func(Context) values.Value, name string, thenthis interface{}) func(Context) values.Value {
 	index := values.ValueOf(name)
 	tt := values.ValueOf(thenthis)
 	_ = tt

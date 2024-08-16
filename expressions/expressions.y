@@ -35,7 +35,7 @@ func init() {
 %type<loopmods> loop_modifiers
 %type<s> string
 %token <val> LITERAL
-%token <name> IDENTIFIER KEYWORD PROPERTY FUNCTION
+%token <name> IDENTIFIER KEYWORD PROPERTY
 %token ASSIGN CYCLE LOOP WHEN
 %token EQ NEQ GE LE IN AND OR CONTAINS DOTDOT
 %token CLOSEP OPENP
@@ -82,7 +82,8 @@ string: LITERAL {
 		panic(SyntaxError(fmt.Sprintf("expected a string for %q", $1)))
 	}
 	$$ = s
-};
+}
+;
 
 loop: IDENTIFIER IN filtered loop_modifiers {
 	name, expr, mods := $1, $3, $4
@@ -122,7 +123,7 @@ expr:
 | expr '[' expr ']' { $$ = makeIndexExpr($1, $3) }
 | '(' expr DOTDOT expr ')' { $$ = makeRangeExpr($2, $4) }
 | '(' cond ')' { $$ = $2 }
-| expr PROPERTY OPENP LITERAL CLOSEP { $$ = makeObjectFunctionExpr($1, $2, $4) }
+| expr PROPERTY OPENP exprs CLOSEP { $$ = makeObjectMethodExpr($1, $2, $4) }
 ;
 
 filtered:

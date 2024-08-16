@@ -20,7 +20,7 @@ type Assignment struct {
 	ValueFn  Expression
 }
 
-// A Cycle is a parse of an {% assign %} statement
+// A Cycle is a parse of an {% cycle %} statement
 type Cycle struct {
 	Group  string
 	Values []string
