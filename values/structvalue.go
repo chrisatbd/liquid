@@ -31,8 +31,12 @@ func (sv structValue) Contains(elem Value) bool {
 	return false
 }
 
-func (sv structValue) MethodValue(k Value, l []reflect.Value) Value {
-	name, ok := k.Interface().(string)
+/*
+NOTES:
+keeping index as name to maintain consistency with PropertyValue
+*/
+func (sv structValue) MethodValue(index Value, args []reflect.Value) Value {
+	name, ok := index.Interface().(string)
 	if !ok {
 		return nilValue
 	}
@@ -40,14 +44,23 @@ func (sv structValue) MethodValue(k Value, l []reflect.Value) Value {
 	sr := reflect.ValueOf(sv.value)
 	st := reflect.TypeOf(sv.value)
 
-	if _, ok := st.MethodByName(name); ok {
-		m := sr.MethodByName(name)
-		return sv.invokeMethod(m, l)
+	//if we got a pointer dereference to type
+	if st.Kind() == reflect.Ptr {
+		if _, found := st.MethodByName(name); found {
+			m := sr.MethodByName(name)
+			return sv.invoke(m)
+		}
+		st = st.Elem()
+		sr = sr.Elem()
+		if !sr.IsValid() {
+			return nilValue
+		}
 	}
 
-	_ = sr
-	_ = st
-	_ = name
+	if _, ok := st.MethodByName(name); ok {
+		m := sr.MethodByName(name)
+		return sv.invokeMethod(m, args)
+	}
 
 	return nilValue
 }

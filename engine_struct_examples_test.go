@@ -190,3 +190,23 @@ func TestValueStruct_Eight(t *testing.T) {
 	require.Equal(t, "chris:57 | ag:1 | joe jones:72", value)
 
 }
+
+func TestValueStruct_TypeConversionFail(t *testing.T) {
+
+	engine := NewEngine()
+
+	har := testValueStructTwo{}
+	har.PropertyOne = 9
+
+	template := `{{ struct.FunctionThree(22,57) }}`
+
+	bindings := map[string]interface{}{
+		"struct": har,
+	}
+
+	//ok, should this be an 'empty' or should we put up an error ?
+	_, err := engine.ParseAndRenderString(template, bindings)
+
+	require.Error(t, err)
+	//require.Equal(t, "chris:57 | ag:1 | joe jones:72", value)
+}

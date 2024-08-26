@@ -48,16 +48,20 @@ func makeObjectPropertyExpr(objFn func(Context) values.Value, name string) func(
 
 func makeObjectMethodExpr(objFn func(Context) values.Value, name string, args interface{}) func(Context) values.Value {
 	index := values.ValueOf(name)
-	tt := values.ValueOf(args)
+	methodArgs := values.ValueOf(args)
 
 	return func(ctx Context) values.Value {
-		arr := tt.Interface()
-		data := arr.([]Expression)
+		exprArr := methodArgs.Interface()
+		argExprs := exprArr.([]Expression)
 
-		inputs := make([]reflect.Value, len(data))
+		inputs := make([]reflect.Value, len(argExprs))
 
-		for i, _ := range data {
-			eval, _ := data[i].Evaluate(ctx)
+		//convert the expression evaluated in the ctx and assign to the args array that
+		//is passed to the method.
+		//we cannot validate types here.
+		//TODO: are there failure conditions to inputs[i] = reflect.ValueOf(eval)
+		for i := range argExprs {
+			eval, _ := argExprs[i].Evaluate(ctx)
 			inputs[i] = reflect.ValueOf(eval)
 		}
 
