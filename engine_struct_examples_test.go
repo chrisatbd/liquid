@@ -51,8 +51,9 @@ func TestValueStruct_One(t *testing.T) {
 func TestValueStruct_Two(t *testing.T) {
 	engine := NewEngine()
 
-	har := testValueStruct{}
-	har.F = 9
+	har := testValueStruct{
+		F: 9,
+	}
 
 	template := `{% assign val = "c" %}{{ m.F }}.{{ m.M1 }}.{{ val }}`
 	bindings := map[string]interface{}{
@@ -69,8 +70,9 @@ func TestValueStruct_Three(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 	har.ArrayOne = append(har.ArrayOne, "one")
 	har.ArrayOne = append(har.ArrayOne, "two")
 
@@ -89,8 +91,9 @@ func TestValueStruct_Four(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 	har.ArrayOne = append(har.ArrayOne, "one")
 	har.ArrayOne = append(har.ArrayOne, "two")
 
@@ -109,8 +112,9 @@ func TestValueStruct_Five(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 
 	template := `{{ struct.FunctionTwo("chris") }}`
 	bindings := map[string]interface{}{
@@ -127,8 +131,9 @@ func TestValueStruct_Six(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 
 	template := `{{ struct.FunctionThree("chris",57) }} | {{ myStringProp }} | {{ myIntProp }}`
 
@@ -148,12 +153,12 @@ func TestValueStruct_Seven(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 
 	template := `{{ struct.FunctionThree("chris",57) }} | {{ myStringProp }} | {{ myIntProp }} | {{ struct.FunctionThree(myStringProp,myIntProp) }}`
-	// {assign var = "c"}
-	//template := `{{ struct.FunctionThree(myprop) }}`
+
 	bindings := map[string]interface{}{
 		"struct":       har,
 		"myStringProp": "ag",
@@ -170,8 +175,9 @@ func TestValueStruct_Eight(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 
 	template := `{{ struct.FunctionThree("chris",57) }} | {{ struct.FunctionThree(myStringProp,myIntProp) }} | {{ struct.FunctionThree(sbs.Name,sbs.Id) }}`
 
@@ -195,18 +201,21 @@ func TestValueStruct_TypeConversionFail(t *testing.T) {
 
 	engine := NewEngine()
 
-	har := testValueStructTwo{}
-	har.PropertyOne = 9
+	har := testValueStructTwo{
+		PropertyOne: 9,
+	}
 
-	template := `{{ struct.FunctionThree(22,57) }}`
+	// FunctionThree expects a string and an int
+	template := `empty: {{ struct.FunctionThree(22,57) }}. has value: {{ struct.FunctionThree("22",57) }}`
 
 	bindings := map[string]interface{}{
 		"struct": har,
 	}
 
 	//ok, should this be an 'empty' or should we put up an error ?
-	_, err := engine.ParseAndRenderString(template, bindings)
+	value, err := engine.ParseAndRenderString(template, bindings)
 
-	require.Error(t, err)
-	//require.Equal(t, "chris:57 | ag:1 | joe jones:72", value)
+	//require.Error(t, err)
+	require.NoError(t, err)
+	require.Equal(t, "empty: . has value: 22:57", value)
 }

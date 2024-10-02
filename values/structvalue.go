@@ -143,6 +143,25 @@ func (sv structValue) invokeMethod(fv reflect.Value, args []reflect.Value) Value
 		return nilValue
 	}
 
+	// ok, lets do some type checking
+	// TODOCJH:  Is this how we want to handle this. ?
+	// is it better than panicking
+	// also look at CanConvert.
+	for i := 0; i < mt.NumIn(); i++ {
+		t := mt.In(i)
+		x := args[i]
+		ans := t.Kind() == x.Kind()
+		if !ans {
+			if x.CanConvert(t) {
+				//convertedValue := x.Convert(reflect.TypeOf("")).Interface().(string)
+				// broken 22 turns int "\x16"
+				convertedValue := x.Convert(t)
+				_ = convertedValue
+			}
+			return nilValue
+		}
+	}
+
 	results := fv.Call(args)
 
 	if len(results) > 1 && !results[1].IsNil() {
