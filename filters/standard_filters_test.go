@@ -2,7 +2,6 @@ package filters
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 
 var filterTests = []struct {
 	in       string
-	expected interface{}
+	expected any
 }{
 	// value filters
 	{`undefined | default: 2.99`, 2.99},
@@ -84,6 +83,8 @@ var filterTests = []struct {
 	// sequence (array or string) filters
 	{`"Ground control to Major Tom." | size`, 28},
 	{`"apples, oranges, peaches, plums" | split: ", " | size`, 4},
+	// count chars, not bytes
+	{`"Straße" | size`, 6},
 
 	// string filters
 	{`"Take my protein pills and put my helmet on" | replace: "my", "your"`, "Take your protein pills and put your helmet on"},
@@ -110,6 +111,8 @@ Liquid" | slice: 0`, "L"},
 	{`"Liquid
 Liquid" | slice: 2, 4`, "quid"},
 	{`"Liquid" | slice: -3, 2`, "ui"},
+	{`"" | slice: 1`, ""},
+	{`"Liquid" | slice: -7`, ""},
 
 	{`"a/b/c" | split: '/' | join: '-'`, "a-b-c"},
 	{`"a/b/" | split: '/' | join: '-'`, "a-b"},
@@ -185,7 +188,6 @@ Liquid" | slice: 2, 4`, "quid"},
 	{`5 | divided_by: 3`, 1},
 	{`20 | divided_by: 7`, 2},
 	{`20 | divided_by: 7.0`, 2.857142857142857},
-	{`20 | divided_by: 's'`, nil},
 
 	{`1.2 | round`, 1.0},
 	{`2.7 | round`, 3.0},
@@ -198,27 +200,35 @@ Liquid" | slice: 2, 4`, "quid"},
 	{`"1" | type`, `string`},
 }
 
-var filterTestBindings = map[string]interface{}{
-	"empty_array":     []interface{}{},
-	"empty_map":       map[string]interface{}{},
+var filterErrorTests = []struct {
+	in    string
+	error string
+}{
+	{`20 | divided_by: 's'`, `error applying filter "divided_by" ("invalid divisor: 's'")`},
+	{`20 | divided_by: 0`, `error applying filter "divided_by" ("division by zero")`},
+}
+
+var filterTestBindings = map[string]any{
+	"empty_array":     []any{},
+	"empty_map":       map[string]any{},
 	"empty_map_slice": yaml.MapSlice{},
-	"map": map[string]interface{}{
+	"map": map[string]any{
 		"a": 1,
 	},
 	"map_slice_2":       yaml.MapSlice{{Key: 1, Value: "b"}, {Key: 2, Value: "a"}},
 	"map_slice_dup":     yaml.MapSlice{{Key: 1, Value: "a"}, {Key: 2, Value: "a"}, {Key: 3, Value: "b"}},
 	"map_slice_has_nil": yaml.MapSlice{{Key: 1, Value: "a"}, {Key: 2, Value: nil}, {Key: 3, Value: "b"}},
 	"map_slice_objs": yaml.MapSlice{
-		{Key: 1, Value: map[string]interface{}{"key": "a"}},
-		{Key: 2, Value: map[string]interface{}{"key": "b"}},
+		{Key: 1, Value: map[string]any{"key": "a"}},
+		{Key: 2, Value: map[string]any{"key": "b"}},
 	},
 	"mixed_case_array": []string{"c", "a", "B"},
-	"mixed_case_hash_values": []map[string]interface{}{
+	"mixed_case_hash_values": []map[string]any{
 		{"key": "c"},
 		{"key": "a"},
 		{"key": "B"},
 	},
-	"sort_prop": []map[string]interface{}{
+	"sort_prop": []map[string]any{
 		{"weight": 1},
 		{"weight": 5},
 		{"weight": 3},
@@ -231,13 +241,13 @@ var filterTestBindings = map[string]interface{}{
 	// for examples from liquid docs
 	"animals": []string{"zebra", "octopus", "giraffe", "Sally Snake"},
 	"fruits":  []string{"apples", "oranges", "peaches", "plums"},
-	"article": map[string]interface{}{
+	"article": map[string]any{
 		"published_at": timeMustParse("2015-07-17T15:04:05Z"),
 	},
-	"page": map[string]interface{}{
+	"page": map[string]any{
 		"title": "Introduction",
 	},
-	"pages": []map[string]interface{}{
+	"pages": []map[string]any{
 		{"name": "page 1", "category": "business"},
 		{"name": "page 2", "category": "celebrities"},
 		{"name": "page 3"},
@@ -256,14 +266,14 @@ var filterTestBindings = map[string]interface{}{
 }
 
 func TestFilters(t *testing.T) {
-	require.NoError(t, os.Setenv("TZ", "America/New_York"))
+	t.Setenv("TZ", "America/New_York")
 
 	var (
-		m1 = map[string]interface{}{"name": "m1"}
-		m2 = map[string]interface{}{"name": "m2"}
-		m3 = map[string]interface{}{"name": "m3"}
+		m1 = map[string]any{"name": "m1"}
+		m2 = map[string]any{"name": "m2"}
+		m3 = map[string]any{"name": "m3"}
 	)
-	filterTestBindings["dup_maps"] = []interface{}{m1, m2, m1, m3}
+	filterTestBindings["dup_maps"] = []any{m1, m2, m1, m3}
 
 	cfg := expressions.NewConfig()
 	AddStandardFilters(&cfg)
@@ -273,7 +283,14 @@ func TestFilters(t *testing.T) {
 		t.Run(fmt.Sprintf("%02d", i+1), func(t *testing.T) {
 			actual, err := expressions.EvaluateString(test.in, context)
 			require.NoErrorf(t, err, test.in)
-			require.Equalf(t, test.expected, actual, test.in)
+			require.EqualValuesf(t, test.expected, actual, test.in)
+		})
+	}
+
+	for i, test := range filterErrorTests {
+		t.Run(fmt.Sprintf("%02d", i+len(filterTests)+1), func(t *testing.T) {
+			_, err := expressions.EvaluateString(test.in, context)
+			require.EqualErrorf(t, err, test.error, test.in)
 		})
 	}
 }

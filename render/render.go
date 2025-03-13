@@ -8,30 +8,35 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/osteele/liquid/parser"
+
 	"github.com/osteele/liquid/values"
 )
 
 // Render renders the render tree.
-func Render(node Node, w io.Writer, vars map[string]interface{}, c Config) Error {
+func Render(node Node, w io.Writer, vars map[string]any, c Config) Error {
 	tw := trimWriter{w: w}
 	if err := node.render(&tw, newNodeContext(vars, c)); err != nil {
 		return err
 	}
-	if err := tw.Flush(); err != nil {
+	if _, err := tw.Flush(); err != nil {
 		panic(err)
 	}
 	return nil
 }
 
-// RenderASTSequence renders a sequence of nodes.
+// RenderSequence renders a sequence of nodes.
 func (c nodeContext) RenderSequence(w io.Writer, seq []Node) Error {
-	tw := trimWriter{w: w}
+	tw, ok := w.(*trimWriter)
+	if !ok {
+		tw = &trimWriter{w: w}
+	}
 	for _, n := range seq {
-		if err := n.render(&tw, c); err != nil {
+		if err := n.render(tw, c); err != nil {
 			return err
 		}
 	}
-	if err := tw.Flush(); err != nil {
+	if _, err := tw.Flush(); err != nil {
 		panic(err)
 	}
 	return nil
@@ -47,9 +52,7 @@ func (n *BlockNode) render(w *trimWriter, ctx nodeContext) Error {
 	if renderer == nil {
 		panic(fmt.Errorf("unset renderer for %v", n))
 	}
-	w.TrimLeft(n.TrimLeft)
 	err := renderer(w, rendererContext{ctx, nil, n})
-	w.TrimRight(n.TrimRight)
 	return wrapRenderError(err, n)
 }
 
@@ -64,7 +67,6 @@ func (n *RawNode) render(w *trimWriter, ctx nodeContext) Error {
 }
 
 func (n *ObjectNode) render(w *trimWriter, ctx nodeContext) Error {
-	w.TrimLeft(n.TrimLeft)
 	value, err := ctx.Evaluate(n.expr)
 	if err != nil {
 		return wrapRenderError(err, n)
@@ -75,7 +77,6 @@ func (n *ObjectNode) render(w *trimWriter, ctx nodeContext) Error {
 	if err := wrapRenderError(writeObject(w, value), n); err != nil {
 		return err
 	}
-	w.TrimRight(n.TrimRight)
 	return nil
 }
 
@@ -89,19 +90,26 @@ func (n *SeqNode) render(w *trimWriter, ctx nodeContext) Error {
 }
 
 func (n *TagNode) render(w *trimWriter, ctx nodeContext) Error {
-	w.TrimLeft(n.TrimLeft)
 	err := wrapRenderError(n.renderer(w, rendererContext{ctx, n, nil}), n)
-	w.TrimRight(n.TrimRight)
 	return err
 }
 
-func (n *TextNode) render(w *trimWriter, ctx nodeContext) Error {
+func (n *TextNode) render(w *trimWriter, _ nodeContext) Error {
 	_, err := io.WriteString(w, n.Source)
 	return wrapRenderError(err, n)
 }
 
+func (n *TrimNode) render(w *trimWriter, _ nodeContext) Error {
+	if n.TrimDirection == parser.Left {
+		return wrapRenderError(w.TrimLeft(), n)
+	} else {
+		w.TrimRight()
+		return nil
+	}
+}
+
 // writeObject writes a value used in an object node
-func writeObject(w io.Writer, value interface{}) error {
+func writeObject(w io.Writer, value any) error {
 	value = values.ToLiquid(value)
 	if value == nil {
 		return nil
@@ -119,7 +127,7 @@ func writeObject(w io.Writer, value interface{}) error {
 	rt := reflect.ValueOf(value)
 	switch rt.Kind() {
 	case reflect.Array, reflect.Slice:
-		for i := 0; i < rt.Len(); i++ {
+		for i := range rt.Len() {
 			item := rt.Index(i)
 			if item.IsValid() {
 				if err := writeObject(w, item.Interface()); err != nil {
