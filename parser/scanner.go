@@ -8,7 +8,6 @@ import (
 
 // Scan breaks a string into a sequence of Tokens.
 func Scan(data string, loc SourceLoc, delims []string) (tokens []Token) {
-
 	// Apply defaults
 	if len(delims) != 4 {
 		delims = []string{"{{", "}}", "{%", "%}"}
@@ -27,28 +26,43 @@ func Scan(data string, loc SourceLoc, delims []string) (tokens []Token) {
 		source := data[ts:te]
 		switch {
 		case data[ts:ts+len(delims[0])] == delims[0]:
-			tok := Token{
+			if source[2] == '-' {
+				tokens = append(tokens, Token{
+					Type: TrimLeftTokenType,
+				})
+			}
+			tokens = append(tokens, Token{
 				Type:      ObjTokenType,
 				SourceLoc: loc,
 				Source:    source,
 				Args:      data[m[2]:m[3]],
-				TrimLeft:  source[2] == '-',
-				TrimRight: source[len(source)-3] == '-',
+			})
+			if source[len(source)-3] == '-' {
+				tokens = append(tokens, Token{
+					Type: TrimRightTokenType,
+				})
 			}
-			tokens = append(tokens, tok)
 		case data[ts:ts+len(delims[2])] == delims[2]:
+			if source[2] == '-' {
+				tokens = append(tokens, Token{
+					Type: TrimLeftTokenType,
+				})
+			}
 			tok := Token{
 				Type:      TagTokenType,
 				SourceLoc: loc,
 				Source:    source,
 				Name:      data[m[4]:m[5]],
-				TrimLeft:  source[2] == '-',
-				TrimRight: source[len(source)-3] == '-',
 			}
 			if m[6] > 0 {
 				tok.Args = data[m[6]:m[7]]
 			}
 			tokens = append(tokens, tok)
+			if source[len(source)-3] == '-' {
+				tokens = append(tokens, Token{
+					Type: TrimRightTokenType,
+				})
+			}
 		}
 		loc.LineNo += strings.Count(source, "\n")
 		p = te
@@ -65,7 +79,7 @@ func formTokenMatcher(delims []string) *regexp.Regexp {
 	// For example, if delims is default the exclusion expression is "[^%]|%[^}]".
 	// If tagRight is "TAG!RIGHT" then expression is
 	// [^T]|T[^A]|TA[^G]|TAG[^!]|TAG![^R]|TAG!R[^I]|TAG!RI[^G]|TAG!RIG[^H]|TAG!RIGH[^T]
-	var exclusion []string
+	exclusion := make([]string, 0, len(delims[3]))
 	for idx, val := range delims[3] {
 		exclusion = append(exclusion, "[^"+string(val)+"]")
 		if idx > 0 {

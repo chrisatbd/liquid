@@ -2,11 +2,13 @@ package render
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"testing"
 	"time"
+
+	e "github.com/chrisatbd/liquid/expressions"
 
 	"github.com/chrisatbd/liquid/parser"
 	"github.com/stretchr/testify/require"
@@ -50,6 +52,14 @@ var renderTests = []struct{ in, out string }{
 	{`x {%- y %} z`, "xy z"},
 	{`x {% y -%} z`, "x yz"},
 	{`x {%- y -%} z`, "xyz"},
+	{"x\n{% y %}\nz", "x\ny\nz"},
+	{"x\n{%- y %}\nz", "xy\nz"},
+	{"x\n{% y -%}\nz", "x\nyz"},
+	{"x\n{% if true %}\ny\n{% endif %}\nz", "x\n\ny\n\nz"},
+	{"x\n{%- if true %}\ny\n{% endif %}\nz", "x\ny\n\nz"},
+	{"x\n{%- if true -%}\ny\n{% endif %}\nz", "xy\n\nz"},
+	{"x\n{%- if true -%}\ny\n{%- endif %}\nz", "xy\nz"},
+	{"x\n{%- if true -%}\ny\n{%- endif -%}\nz", "xyz"},
 }
 
 var renderStrictTests = []struct{ in, out string }{
@@ -73,11 +83,11 @@ var renderErrorTests = []struct{ in, out string }{
 	{`{% errblock %}{% enderrblock %}`, "errblock error"},
 }
 
-var renderTestBindings = map[string]interface{}{
+var renderTestBindings = map[string]any{
 	"array": []string{"first", "second", "third"},
 	"date":  time.Date(2015, 7, 17, 15, 4, 5, 123456789, time.UTC),
 	"int":   123,
-	"sort_prop": []map[string]interface{}{
+	"sort_prop": []map[string]any{
 		{"weight": 1},
 		{"weight": 5},
 		{"weight": 3},
@@ -85,10 +95,10 @@ var renderTestBindings = map[string]interface{}{
 	},
 	// for examples from liquid docs
 	"animals": []string{"zebra", "octopus", "giraffe", "Sally Snake"},
-	"page": map[string]interface{}{
+	"page": map[string]any{
 		"title": "Introduction",
 	},
-	"pages": []map[string]interface{}{
+	"pages": []map[string]any{
 		{"category": "business"},
 		{"category": "celebrities"},
 		{},
@@ -121,7 +131,7 @@ func TestRenderErrors(t *testing.T) {
 		t.Run(fmt.Sprintf("%02d", i+1), func(t *testing.T) {
 			root, err := cfg.Compile(test.in, parser.SourceLoc{})
 			require.NoErrorf(t, err, test.in)
-			err = Render(root, ioutil.Discard, renderTestBindings, cfg)
+			err = Render(root, io.Discard, renderTestBindings, cfg)
 			require.Errorf(t, err, test.in)
 			require.Containsf(t, err.Error(), test.out, test.in)
 		})
@@ -160,7 +170,54 @@ func addRenderTestTags(cfg Config) {
 	})
 	cfg.AddBlock("errblock").Compiler(func(c BlockNode) (func(io.Writer, Context) error, error) {
 		return func(w io.Writer, c Context) error {
-			return fmt.Errorf("errblock error")
+			return errors.New("errblock error")
 		}, nil
 	})
+	cfg.AddBlock("if").Clause("else").Clause("elsif").Compiler(ifTagCompiler(true))
+}
+
+// this is copied from standard tags.
+func ifTagCompiler(polarity bool) func(BlockNode) (func(io.Writer, Context) error, error) { // nolint: gocyclo
+	return func(node BlockNode) (func(io.Writer, Context) error, error) {
+		type branchRec struct {
+			test e.Expression
+			body *BlockNode
+		}
+		expr, err := e.Parse(node.Args)
+		if err != nil {
+			return nil, err
+		}
+		if !polarity {
+			expr = e.Not(expr)
+		}
+		branches := []branchRec{
+			{expr, &node},
+		}
+		for _, c := range node.Clauses {
+			test := e.Constant(true)
+			switch c.Name {
+			case "else":
+			// TODO syntax error if this isn't the last branch
+			case "elsif":
+				t, err := e.Parse(c.Args)
+				if err != nil {
+					return nil, err
+				}
+				test = t
+			}
+			branches = append(branches, branchRec{test, c})
+		}
+		return func(w io.Writer, ctx Context) error {
+			for _, b := range branches {
+				value, err := ctx.Evaluate(b.test)
+				if err != nil {
+					return err
+				}
+				if value != nil && value != false {
+					return ctx.RenderBlock(w, b.body)
+				}
+			}
+			return nil
+		}, nil
+	}
 }
