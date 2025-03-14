@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chrisatbd/liquid/parser"
+	"github.com/osteele/liquid/parser"
 
-	"github.com/chrisatbd/liquid/expressions"
+	"github.com/osteele/liquid/expressions"
 )
 
 // Context provides the rendering context for a tag renderer.

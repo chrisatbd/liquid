@@ -5,8 +5,8 @@ import (
 	"log"
 	"strconv"
 	"strings"
-
-	"github.com/chrisatbd/liquid/render"
+	
+	"github.com/osteele/liquid/render"
 )
 
 func Example() {
@@ -74,7 +74,7 @@ func ExampleEngine_RegisterFilter_optional_argument() {
 	// Then we can't tell the difference between {{ n | inc }} and
 	// {{ n | inc: 0 }}. A function in the parameter list has a special
 	// meaning as a default parameter.
-	engine.RegisterFilter("increment", func(a int, b func(int) int) int {
+	engine.RegisterFilter("inc", func(a int, b func(int) int) int {
 		return a + b(1)
 	})
 	template := `10 + 1 = {{ m | inc }}; 20 + 5 = {{ n | inc: 5 }}`

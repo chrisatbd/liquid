@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/chrisatbd/liquid/parser"
+	"github.com/osteele/liquid/parser"
 
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 )
 
 // Render renders the render tree.

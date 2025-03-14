@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 )
 
 // TODO Expression and Closure are confusing names.

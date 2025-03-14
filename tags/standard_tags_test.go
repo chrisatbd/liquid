@@ -6,8 +6,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/chrisatbd/liquid/parser"
-	"github.com/chrisatbd/liquid/render"
+	"github.com/osteele/liquid/parser"
+	"github.com/osteele/liquid/render"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/chrisatbd/liquid/render"
+	"github.com/osteele/liquid/render"
 )
 
 // "subtemplate/path, var1:val1, var2: val2, var3: val3, ..."

@@ -3,7 +3,7 @@ package expressions
 import (
 	"reflect"
 
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 )
 
 func makeRangeExpr(startFn, endFn func(Context) values.Value) func(Context) values.Value {

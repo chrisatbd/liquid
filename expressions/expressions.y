@@ -2,7 +2,7 @@
 package expressions
 import (
 	"fmt"
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 )
 
 func init() {

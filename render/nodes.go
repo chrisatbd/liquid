@@ -3,8 +3,8 @@ package render
 import (
 	"io"
 
-	"github.com/chrisatbd/liquid/expressions"
-	"github.com/chrisatbd/liquid/parser"
+	"github.com/osteele/liquid/expressions"
+	"github.com/osteele/liquid/parser"
 )
 
 // Node is a node of the render tree.
