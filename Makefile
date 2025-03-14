@@ -2,7 +2,7 @@ SOURCEDIR=.
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 
 LIB = liquid
-PACKAGE = github.com/osteele/chrisatbd
+PACKAGE = github.com/osteele/liquid
 LDFLAGS=
 
 .DEFAULT_GOAL: ci
