@@ -21,6 +21,11 @@ func NewEngine() *Engine {
 	return &e
 }
 
+// NewBasicEngine returns a new Engine without the standard filters or tags.
+func NewBasicEngine() *Engine {
+	return &Engine{render.NewConfig()}
+}
+
 // RegisterBlock defines a block e.g. {% tag %}…{% endtag %}.
 func (e *Engine) RegisterBlock(name string, td Renderer) {
 	e.cfg.AddBlock(name).Renderer(func(w io.Writer, ctx render.Context) error {
@@ -43,7 +48,7 @@ func (e *Engine) RegisterBlock(name string, td Renderer) {
 // * https://github.com/osteele/liquid/blob/main/filters/standard_filters.go
 //
 // * https://github.com/osteele/gojekyll/blob/master/filters/filters.go
-func (e *Engine) RegisterFilter(name string, fn interface{}) {
+func (e *Engine) RegisterFilter(name string, fn any) {
 	e.cfg.AddFilter(name, fn)
 }
 

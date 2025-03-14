@@ -3,7 +3,7 @@ package tags
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"regexp"
 	"strings"
 	"testing"
@@ -17,6 +17,7 @@ import (
 
 var iterationTests = []struct{ in, expected string }{
 	{`{% for a in array %}{{ a }} {% endfor %}`, "first second third "},
+	{`{% for a in array %}{{ a }} {% else %}else{% endfor %}`, "first second third "},
 	{`{% for a in nil %}{{ a }}.{% endfor %}`, ""},
 	{`{% for a in false %}{{ a }}.{% endfor %}`, ""},
 	{`{% for a in 2 %}{{ a }}.{% endfor %}`, ""},
@@ -38,6 +39,7 @@ var iterationTests = []struct{ in, expected string }{
 	{`{% for a in array offset: loopmods["offset"] %}{{ a }}.{% endfor %}`, "second.third."},
 	{`{% for a in array reversed limit: 1 %}{{ a }}.{% endfor %}`, "third."},
 	{`{% for a in array limit: 0 %}{{ a }}.{% endfor %}`, ""},
+	{`{% for a in array limit: 0 %}{{ a }}.{% else %}ELSE{% endfor %}`, "ELSE"},
 	{`{% for a in array offset: 3 %}{{ a }}.{% endfor %}`, ""},
 	{`{% for a in array offset: 10 %}{{ a }}.{% endfor %}`, ""},
 	// TODO investigate how these combine; does it depend on the order?
@@ -54,8 +56,10 @@ var iterationTests = []struct{ in, expected string }{
 	{`{% for a in array %}{{ forloop.rindex0 }}.{% endfor %}`, "2.1.0."},
 	{`{% for a in array %}{{ forloop.length }}.{% endfor %}`, "3.3.3."},
 
-	{`{% for i in array %}{{ forloop.index }}[{% for j in array %}{{ forloop.index }}{% endfor %}]{{ forloop.index }}{% endfor %}`,
-		"1[123]12[123]23[123]3"},
+	{
+		`{% for i in array %}{{ forloop.index }}[{% for j in array %}{{ forloop.index }}{% endfor %}]{{ forloop.index }}{% endfor %}`,
+		"1[123]12[123]23[123]3",
+	},
 
 	{`{% for a in array reversed %}{{ forloop.first }}.{% endfor %}`, "true.false.false."},
 	{`{% for a in array reversed %}{{ forloop.last }}.{% endfor %}`, "false.false.true."},
@@ -89,30 +93,40 @@ var iterationTests = []struct{ in, expected string }{
 	{`{% assign l = (3..5) %}{% for i in l %}{{i}}.{% endfor %}`, "3.4.5."},
 
 	// tablerow
-	{`{% tablerow product in products %}{{ product }}{% endtablerow %}`,
+	{
+		`{% tablerow product in products %}{{ product }}{% endtablerow %}`,
 		`<tr class="row1"><td class="col1">Cool Shirt</td>
 	<td class="col2">Alien Poster</td>
 	<td class="col3">Batman Poster</td>
 	<td class="col4">Bullseye Shirt</td>
 	<td class="col5">Another Classic Vinyl</td>
-	<td class="col6">Awesome Jeans</td></tr>`},
+	<td class="col6">Awesome Jeans</td></tr>`,
+	},
 
-	{`{% tablerow product in products cols:2 %}{{ product }}{% endtablerow %}`,
+	{
+		`{% tablerow product in products cols:2 %}{{ product }}{% endtablerow %}`,
 		`<tr class="row1"><td class="col1">Cool Shirt</td><td class="col2">Alien Poster</td></tr>
 		 <tr class="row2"><td class="col1">Batman Poster</td><td class="col2">Bullseye Shirt</td></tr>
-	  	 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`},
-	{`{% tablerow product in products cols: cols %}{{ product }}{% endtablerow %}`,
+	  	 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`,
+	},
+	{
+		`{% tablerow product in products cols: cols %}{{ product }}{% endtablerow %}`,
 		`<tr class="row1"><td class="col1">Cool Shirt</td><td class="col2">Alien Poster</td></tr>
 		 <tr class="row2"><td class="col1">Batman Poster</td><td class="col2">Bullseye Shirt</td></tr>
-	  	 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`},
-	{`{% tablerow product in products cols: loopmods.cols %}{{ product }}{% endtablerow %}`,
+	  	 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`,
+	},
+	{
+		`{% tablerow product in products cols: loopmods.cols %}{{ product }}{% endtablerow %}`,
 		`<tr class="row1"><td class="col1">Cool Shirt</td><td class="col2">Alien Poster</td></tr>
 		 <tr class="row2"><td class="col1">Batman Poster</td><td class="col2">Bullseye Shirt</td></tr>
-		 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`},
-	{`{% tablerow product in products cols: loopmods.cols %}{{ product }}{% endtablerow %}`,
+		 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`,
+	},
+	{
+		`{% tablerow product in products cols: loopmods.cols %}{{ product }}{% endtablerow %}`,
 		`<tr class="row1"><td class="col1">Cool Shirt</td><td class="col2">Alien Poster</td></tr>
 		 <tr class="row2"><td class="col1">Batman Poster</td><td class="col2">Bullseye Shirt</td></tr>
-		 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`},
+		 <tr class="row3"><td class="col1">Another Classic Vinyl</td><td class="col2">Awesome Jeans</td></tr>`,
+	},
 }
 
 var iterationSyntaxErrorTests = []struct{ in, expected string }{
@@ -127,13 +141,14 @@ var iterationErrorTests = []struct{ in, expected string }{
 	{`{% cycle 'a', 'b' %}`, "cycle must be within a forloop"},
 	{`{% for a in array | undefined_filter %}{% endfor %}`, "undefined filter"},
 	{`{% for a in array %}{{ a | undefined_filter }}{% endfor %}`, "undefined filter"},
+	{`{% for a in array %}{% else %}{% else %}{% endfor %}`, "for loops accept at most one else clause"},
 }
 
-var iterationTestBindings = map[string]interface{}{
+var iterationTestBindings = map[string]any{
 	"array": []string{"first", "second", "third"},
 	// hash has only one element, since iteration order is non-deterministic
-	"map":       map[string]interface{}{"a": 1},
-	"keyed_map": IterationKeyedMap(map[string]interface{}{"a": 1, "b": 2}),
+	"map":       map[string]any{"a": 1},
+	"keyed_map": IterationKeyedMap(map[string]any{"a": 1, "b": 2}),
 	"map_slice": yaml.MapSlice{{Key: "a", Value: 1}, {Key: "b", Value: 2}},
 	"products": []string{
 		"Cool Shirt", "Alien Poster", "Batman Poster", "Bullseye Shirt", "Another Classic Vinyl", "Awesome Jeans",
@@ -141,7 +156,7 @@ var iterationTestBindings = map[string]interface{}{
 	"offset":      1,
 	"limit":       2,
 	"cols":        2,
-	"loopmods":    map[string]interface{}{"limit": 2, "offset": 1, "cols": 2},
+	"loopmods":    map[string]any{"limit": 2, "offset": 1, "cols": 2},
 	"empty_array": []string{},
 }
 
@@ -182,7 +197,7 @@ func TestIterationTags_errors(t *testing.T) {
 		t.Run(fmt.Sprintf("%02d", i+1+len(iterationSyntaxErrorTests)), func(t *testing.T) {
 			root, err := cfg.Compile(test.in, parser.SourceLoc{})
 			require.NoErrorf(t, err, test.in)
-			err = render.Render(root, ioutil.Discard, iterationTestBindings, cfg)
+			err = render.Render(root, io.Discard, iterationTestBindings, cfg)
 			require.Errorf(t, err, test.in)
 			require.Containsf(t, err.Error(), test.expected, test.in)
 		})

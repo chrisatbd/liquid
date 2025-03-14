@@ -15,7 +15,7 @@ func (c Config) Parse(source string, loc SourceLoc) (ASTNode, Error) {
 }
 
 // Parse creates an AST from a sequence of tokens.
-func (c Config) parseTokens(tokens []Token) (ASTNode, Error) { // nolint: gocyclo
+func (c Config) parseTokens(tokens []Token) (ASTNode, Error) { //nolint: gocyclo
 	// a stack of control tag state, for matching nested {%if}{%endif%} etc.
 	type frame struct {
 		syntax BlockSyntax
@@ -57,6 +57,9 @@ func (c Config) parseTokens(tokens []Token) (ASTNode, Error) { // nolint: gocycl
 		case tok.Type == TextTokenType:
 			*ap = append(*ap, &ASTText{Token: tok})
 		case tok.Type == TagTokenType:
+			if g == nil {
+				return nil, Errorf(tok, "Grammar field is nil")
+			}
 			if cs, ok := g.BlockSyntax(tok.Name); ok {
 				switch {
 				case tok.Name == "comment":
@@ -96,6 +99,10 @@ func (c Config) parseTokens(tokens []Token) (ASTNode, Error) { // nolint: gocycl
 			} else {
 				*ap = append(*ap, &ASTTag{tok})
 			}
+		case tok.Type == TrimLeftTokenType:
+			*ap = append(*ap, &ASTTrim{TrimDirection: Left})
+		case tok.Type == TrimRightTokenType:
+			*ap = append(*ap, &ASTTrim{TrimDirection: Right})
 		}
 	}
 	if bn != nil {
