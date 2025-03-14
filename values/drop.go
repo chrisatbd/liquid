@@ -6,11 +6,11 @@ import (
 )
 
 type drop interface {
-	ToLiquid() interface{}
+	ToLiquid() any
 }
 
 // ToLiquid converts an object to Liquid, if it implements the Drop interface.
-func ToLiquid(value interface{}) interface{} {
+func ToLiquid(value any) any {
 	switch value := value.(type) {
 	case drop:
 		return value.ToLiquid()
@@ -35,7 +35,7 @@ func (w *dropWrapper) Less(o Value) bool           { return w.Resolve().Less(o) 
 func (w *dropWrapper) IndexValue(i Value) Value    { return w.Resolve().IndexValue(i) }
 func (w *dropWrapper) Contains(o Value) bool       { return w.Resolve().Contains(o) }
 func (w *dropWrapper) Int() int                    { return w.Resolve().Int() }
-func (w *dropWrapper) Interface() interface{}      { return w.Resolve().Interface() }
+func (w *dropWrapper) Interface() any              { return w.Resolve().Interface() }
 func (w *dropWrapper) PropertyValue(k Value) Value { return w.Resolve().PropertyValue(k) }
 func (w *dropWrapper) MethodValue(k Value, l []reflect.Value) Value {
 	return w.Resolve().MethodValue(k, l)
