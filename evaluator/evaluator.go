@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 )
 
 // Convert should be replaced by values.Convert.

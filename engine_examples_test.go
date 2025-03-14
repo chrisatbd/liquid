@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/chrisatbd/liquid/render"
+	"github.com/osteele/liquid/render"
 )
 
 func Example() {

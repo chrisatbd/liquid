@@ -3,9 +3,9 @@ package tags
 import (
 	"io"
 
-	e "github.com/chrisatbd/liquid/expressions"
-	"github.com/chrisatbd/liquid/render"
-	"github.com/chrisatbd/liquid/values"
+	e "github.com/osteele/liquid/expressions"
+	"github.com/osteele/liquid/render"
+	"github.com/osteele/liquid/values"
 )
 
 type caseInterpreter interface {

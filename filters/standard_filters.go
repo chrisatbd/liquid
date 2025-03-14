@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/chrisatbd/liquid/values"
+	"github.com/osteele/liquid/values"
 	"github.com/osteele/tuesday"
 )
 

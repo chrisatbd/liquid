@@ -3,7 +3,7 @@ package render
 import (
 	"fmt"
 
-	"github.com/chrisatbd/liquid/parser"
+	"github.com/osteele/liquid/parser"
 )
 
 // Compile parses a source template. It returns an AST root, that can be evaluated.
