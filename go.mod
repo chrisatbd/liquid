@@ -3,9 +3,9 @@
 //DONOTMERGE TO Contributions
 //
 //***********************************************************************************************
-module github.com/chrisatbd/liquid
+module github.com/osteele/liquid
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/osteele/tuesday v1.0.3
