@@ -10,7 +10,7 @@ type Config struct {
 	grammar
 	Cache           map[string][]byte
 	StrictVariables bool
-	TemplateStore   ITemplateStore
+	TemplateStore   TemplateStore
 }
 
 type grammar struct {
@@ -18,7 +18,8 @@ type grammar struct {
 	blockDefs map[string]*blockSyntax
 }
 
-// NewConfig creates a new Settings.  TemplateStore is initialized to a FileTemplateStore for backwards compatability
+// NewConfig creates a new Settings.
+// TemplateStore is initialized to a FileTemplateStore for backwards compatibility
 func NewConfig() Config {
 	g := grammar{
 		tags:      map[string]TagCompiler{},
