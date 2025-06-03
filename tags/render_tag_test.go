@@ -9,6 +9,8 @@ import (
 
 	"github.com/osteele/liquid/parser"
 	"github.com/osteele/liquid/render"
+	"github.com/osteele/liquid/parser"
+	"github.com/osteele/liquid/render"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+
 	"github.com/osteele/liquid/render"
 )
 

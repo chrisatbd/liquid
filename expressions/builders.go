@@ -1,8 +1,6 @@
 package expressions
 
 import (
-	"reflect"
-
 	"github.com/osteele/liquid/values"
 )
 
