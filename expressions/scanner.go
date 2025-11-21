@@ -219,6 +219,10 @@ type lexer struct {
 	ts, te, act int
 }
 
+func (l *lexer) token() string {
+	return string(l.data[l.ts:l.te])
+}
+
 func newLexer(data []byte) *lexer {
 	lex := &lexer{
 		data: data,
@@ -676,8 +680,4 @@ func (lex *lexer) Lex(out *yySymType) int {
 
 func (lex *lexer) Error(e string) {
 	// fmt.Println("scan error:", e)
-}
-
-func (l *lexer) token() string {
-	return string(l.data[l.ts:l.te])
 }
